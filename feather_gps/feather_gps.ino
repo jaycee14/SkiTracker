@@ -19,28 +19,40 @@ static const uint32_t GPSBaud = 9600;
 TinyGPSPlus gps;
 Adafruit_BMP085 bmp;
 
+static const uint32_t SERIAL_DEBUG = 0;
+
 void setup()
 {
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
 
+  if(SERIAL_DEBUG==1){
+    Serial.begin(115200);
+    while (!Serial) {
+      ; // wait for serial port to connect. Needed for native USB port only
+    }
+  }
   Serial1.begin(GPSBaud);
   
   //ss.begin(GPSBaud);
 
-  Serial.println(F("Starting..."));
-
+  if(SERIAL_DEBUG==1){
+    Serial.println(F("Starting..."));
+  }
+  
   if (!SD.begin(chipSelect)) {
-    Serial.println("Card failed, or not present");
+    if(SERIAL_DEBUG==1){
+      Serial.println("Card failed, or not present");
+    }
     // don't do anything more:
     return;
   }
-  Serial.println("card initialized.");
-
+  if(SERIAL_DEBUG==1){
+    Serial.println("card initialized.");
+  }
+  
   if (!bmp.begin()) {
-    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    if(SERIAL_DEBUG==1){
+      Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    }
     return;
   }
 
@@ -118,7 +130,9 @@ void loop()
   smartDelay(1000);
 
   if (millis() > 5000 && gps.charsProcessed() < 10)
-    Serial.println(F("No GPS data received: check wiring"));
+    if(SERIAL_DEBUG==1){
+      Serial.println(F("No GPS data received: check wiring"));
+    }
 }
 
 // This custom version of delay() ensures that the gps object
@@ -145,11 +159,15 @@ void writeToFile(String ds)
     dataFile.println(ds);
     dataFile.close();
     // print to the serial port too:
-    Serial.println(ds);
+    if(SERIAL_DEBUG==1){
+      Serial.println(ds);
+    }
   }
   // if the file isn't open, pop up an error:
   else {
-    Serial.println("error opening datalog.txt");
+    if(SERIAL_DEBUG==1){
+      Serial.println("error opening datalog.txt");
+    }
   }
 }
 
