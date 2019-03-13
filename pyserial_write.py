@@ -1,6 +1,9 @@
 import serial
 
-port = '/dev/cu.usbmodem411'
+#Have this code ready to go, upload script to feather and then run this script
+
+#port = '/dev/cu.usbmodem411'
+port = '/dev/ttyACM0'
 
 ser = serial.Serial(port,115200)
 
