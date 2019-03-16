@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>SkiTracker Viewer Leaflet</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" href="./js/leaflet-0.7.2.css"/>
+		<link rel="stylesheet" href="./js/Leaflet.Elevation-0.0.4.css"/>
+		<script src="./js/d3.v3.min.js"></script>
+   		<script src="./js/leaflet-0.7.2.js"></script>
+   		<script src="./js/leaflet.elevation-0.0.4.min.js"></script>
+   		<script src="./js/gpx.min.js"></script>
+
+	</head>
+	<style type="text/css">
+		#mapid { height: 720px; }
+	</style>
+	<body>
+		<div id="mapid"></div>
+		<script type="text/javascript">
+			
+			var mymap = L.map('mapid').setView([45.015327, 6.1279969], 13);
+
+			var el = L.control.elevation({
+  	position: "topright",
+	theme: "steelblue-theme", //default: lime-theme
+	width: 600,
+	height: 125,
+	margins: {
+		top: 10,
+		right: 20,
+		bottom: 30,
+		left: 50
+	},
+	useHeightIndicator: true, //if false a marker is drawn at map position
+	interpolation: "linear", //see https://github.com/mbostock/d3/wiki/SVG-Shapes#wiki-area_interpolate
+	hoverNumber: {
+		decimalsX: 3, //decimals on distance (always in km)
+		decimalsY: 0, //deciamls on hehttps://www.npmjs.com/package/leaflet.coordinatesight (always in m)
+		formatter: undefined //custom formatter function may be injected
+	},
+	xTicks: undefined, //number of ticks in x axis, calculated by default according to width
+	yTicks: undefined, //number of ticks on y axis, calculated by default according to height
+	collapsed: false,  //collapsed mode, show chart on click or mouseover
+	imperial: false    //display imperial units instead of metric
+});
+			el.addTo(mymap);
+			var g=new L.GPX("gpx_14Mar18.xml", {async: true,marker_options: {
+    startIconUrl: './js/pin-icon-start.png',
+    endIconUrl: './js/pin-icon-end.png',
+    shadowUrl: './js/pin-shadow.png'
+  }});
+			g.on("addline",function(e){
+				el.addData(e.line);
+			});
+			g.addTo(mymap);
+
+			L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			}).addTo(mymap);
+
+		</script>
+</body>
+</html>

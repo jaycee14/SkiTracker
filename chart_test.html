@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>SkiTracker Viewer Leaflet</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<script src="./js/d3.v3.min.js"></script>
+		<script type="text/javascript" src="./js/three.r81.min.js"></script>
+		<script type="text/javascript" src="./js/three_d.js"></script>
+		<style type="text/css">
+			#div_plot_area { height: 720px; width: 720px;}
+	</style>
+	</head>
+
+	<body>
+		<p>The three variables are plotted in the figure below.</p>
+
+		<div id="div_plot_area"></div>
+
+		<script type="text/javascript">
+			
+			// Define a function to initialise the plot:
+function init_plot(data) {
+  // The object to hold all the information about the plot:
+  var params = {};
+  
+  // Change this to whatever the div is called:
+  params.div_id = "div_plot_area";
+  params.geom_type ="none";
+  
+  params.point_type = "plus";
+  // An array of objects, one per data point:
+  params.data = data;
+  
+  // Make the plot:
+  three_d.make_scatter(params);
+}
+
+// Call the initialisation function:
+d3.json('json_14Mar18_single.json',function(data) {
+	init_plot(data);
+
+});
+
+		</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>SkiTracker Viewer</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	</head>
+	<body>
+		<div id="webgl"></div>
+
+
+		<script src="../js/three.js-master/three.min.js"></script>
+		<!-- <script src="../lib/TrackballControls.js"></script>  -->
+		<script src="../js/d3/d3.min.js"></script>
+		<script src="../js/d3-geo/d3-geo.min.js"></script>
+		<script type="text/javascript">
+			
+			var width  = window.innerWidth,
+	        height = window.innerHeight,
+	        terrainSize = 60, // 5 x 5 km
+	        heightFactor = terrainSize / 12;
+
+
+		    var scene = new THREE.Scene();
+		    scene.add(new THREE.AmbientLight(0xeeeeee));
+
+		    var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+
+		    camera.position.set(0, -terrainSize / 2, terrainSize / 2);
+
+		    var renderer = new THREE.WebGLRenderer();
+
+		    renderer.setSize(width, height);
+
+		    /*
+		    var terrainLoader = new THREE.TerrainLoader();
+		    terrainLoader.load('../assets/jotunheimen512.bin', createTerrain);
+		    */
+		    var projection = d3.geoTransverseMercator()
+		        .translate([terrainSize / 2, terrainSize / 2])
+		        .scale(terrainSize * 106.4)  
+		        .rotate([-9, 0, 0])
+		        //.center([-0.714, 61.512]);
+		        .center([-2.872003, 45.015327]);
+		        //.center([6.1279969, 45.015327]);      
+		    // var controls = new THREE.TrackballControls(camera); 
+
+		    document.getElementById('webgl').appendChild(renderer.domElement);
+		    render();
+		    
+
+		    function render() {
+		        //controls.update();    
+		        requestAnimationFrame(render);
+		        renderer.render(scene, camera);
+		    }
+
+		    //function createTerrain(data) {
+		        // var geometry = new THREE.PlaneGeometry(terrainSize, terrainSize, 511, 511);
+		        // for (var i = 0, l = geometry.vertices.length; i < l; i++) {
+		        //     geometry.vertices[i].z = data[i] / 65535 * heightFactor;
+		        // }
+		        // var material = new THREE.MeshPhongMaterial({
+		        //     map: THREE.ImageUtils.loadTexture('../assets/jotunheimen-texture.jpg')
+		        // });
+		        // var plane = new THREE.Mesh(geometry, material);
+		        // scene.add(plane);
+		       // d3.xml('gpx_14Mar18.xml', 'application/xml', gpxParser);
+		   // }
+
+		    function gpxParser(gpx) {
+		    	//console.log(gpx.documentElement);
+		        var tracks = gpx.documentElement.getElementsByTagName('trk'), 
+		            geometry = new THREE.Geometry();
+
+		        console.log(tracks);
+
+		        //var segments = tracks.getElementsByTagName('trkseg');
+		        var segments = gpx.documentElement.getElementsByTagName('trkseg');
+
+
+		        console.log(segments);
+		        for (i = 0; i < segments.length; i++) { 
+		            var points = segments[i].getElementsByTagName('trkpt')
+		            for (x = 0; x < points.length; x++) { // points.length
+		                var point = points[x],
+		                    alt = parseInt(point.getElementsByTagName('ele')[0].firstChild.nodeValue),
+		                    lat = parseFloat(point.getAttribute('lat')),
+		                    lng = parseFloat(point.getAttribute('lon')),
+		                    coord = translate(projection([lng, lat]));
+		                    console.log(coord);
+		                geometry.vertices.push(new THREE.Vector3(coord[0], coord[1], (alt / 2470 * heightFactor) + (0.01 * heightFactor))); 
+		            }
+		        }
+		        var material = new THREE.LineBasicMaterial({
+		            color: 0xffffff,
+		            linewidth: 2
+		        });
+		        var line = new THREE.Line(geometry, material);
+		        scene.add(line);
+		    }
+		    // Change coordinate space
+		    function translate(point) {
+		        return [point[0] - (terrainSize / 2), (terrainSize / 2) - point[1]];
+		    }
+
+		    d3.xml('gpx_14Mar18.xml').then(gpxParser);
+
+		</script>
+	</body>
+</html>
