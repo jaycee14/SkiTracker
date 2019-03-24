@@ -18,29 +18,32 @@
 		<div id="div_plot_area"></div>
 
 		<script type="text/javascript">
+
+		var url = new URL(window.location.href);
+		var track_file = url.searchParams.get("track") + '.json';
+		console.log(track_file);
 			
 			// Define a function to initialise the plot:
-function init_plot(data) {
-  // The object to hold all the information about the plot:
-  var params = {};
-  
-  // Change this to whatever the div is called:
-  params.div_id = "div_plot_area";
-  params.geom_type ="none";
-  
-  params.point_type = "plus";
-  // An array of objects, one per data point:
-  params.data = data;
-  
-  // Make the plot:
-  three_d.make_scatter(params);
-}
+		function init_plot(data) {
+		  // The object to hold all the information about the plot:
+		  var params = {};
+		  
+		  // Change this to whatever the div is called:
+		  params.div_id = "div_plot_area";
+		  params.geom_type ="none";
+		  
+		  params.point_type = "plus";
+		  // An array of objects, one per data point:
+		  params.data = data;
+		  
+		  // Make the plot:
+		  three_d.make_scatter(params);
+		}
 
-// Call the initialisation function:
-d3.json('json_14Mar18_single.json',function(data) {
-	init_plot(data);
-
-});
+		// Call the initialisation function:
+		d3.json('json_files/'+track_file,function(data) {
+			init_plot(data);
+		});
 
 		</script>
 </body>

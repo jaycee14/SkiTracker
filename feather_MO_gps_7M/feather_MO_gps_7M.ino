@@ -17,7 +17,7 @@ static const uint32_t GPSBaud = 9600;
 TinyGPSPlus gps;
 Adafruit_BMP280 bmp;
 
-static const uint32_t SERIAL_DEBUG = 1;
+static const uint32_t SERIAL_DEBUG = 0;
 
 void setup()
 {

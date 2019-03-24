@@ -5,7 +5,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link rel="stylesheet" href="./js/leaflet-0.7.2.css"/>
-		<link rel="stylesheet" href="./js/Leaflet.Elevation-0.0.4.css"/>
+		<link rel="stylesheet" href="./js/leaflet.elevation-0.0.4.css"/>
 		<script src="./js/d3.v3.min.js"></script>
    		<script src="./js/leaflet-0.7.2.js"></script>
    		<script src="./js/leaflet.elevation-0.0.4.min.js"></script>
@@ -18,8 +18,13 @@
 	<body>
 		<div id="mapid"></div>
 		<script type="text/javascript">
+
+			//var url_string = "http://www.example.com/t.html?a=1&b=3&c=m2-m3-m4-m5"; //window.location.href
+			var url = new URL(window.location.href);
+			var track_file = url.searchParams.get("track") + '.xml';
+			console.log(track_file);
 			
-			var mymap = L.map('mapid').setView([45.015327, 6.1279969], 13);
+			var mymap = L.map('mapid').setView([45.0804145, 6.0929205], 13);
 
 			var el = L.control.elevation({
   	position: "topright",
@@ -45,11 +50,11 @@
 	imperial: false    //display imperial units instead of metric
 });
 			el.addTo(mymap);
-			var g=new L.GPX("gpx_14Mar18.xml", {async: true,marker_options: {
-    startIconUrl: './js/pin-icon-start.png',
-    endIconUrl: './js/pin-icon-end.png',
-    shadowUrl: './js/pin-shadow.png'
-  }});
+			var g=new L.GPX("gpx_files/"+track_file, {async: true,marker_options: {
+    														startIconUrl: './js/pin-icon-start.png',
+    														endIconUrl: './js/pin-icon-end.png',
+    														shadowUrl: './js/pin-shadow.png'
+  														}});
 			g.on("addline",function(e){
 				el.addData(e.line);
 			});
