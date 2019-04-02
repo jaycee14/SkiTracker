@@ -115,7 +115,7 @@
 
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.minDistance = 1;
-				controls.maxDistance = 50;
+				controls.maxDistance = 500;
 
 
 				// Position and Color Data
@@ -124,11 +124,15 @@
 				var colors = [];
 				var points_vectors=[];
 
-				for(var i = 0; i<points.length;i++){
-					var v_point = new THREE.Vector3(points[i].x,points[i].y,points[i].z);
-					points_vectors.push(v_point);
+				// for(var i = 0; i<points.length;i++){
+				// 	var v_point = new THREE.Vector3(points[i].x,points[i].y,points[i].z);
+				// 	points_vectors.push(v_point);
 
-				}
+				// }
+
+				points_vectors.push(new THREE.Vector3(1,2,3));
+				points_vectors.push(new THREE.Vector3(1,1,1));
+				points_vectors.push(new THREE.Vector3(0,0,0));
 
 				//var points = hilbert3D( new THREE.Vector3( 0, 0, 0 ), 20.0, 1, 0, 1, 2, 3, 4, 5, 6, 7 );
 
@@ -156,7 +160,7 @@
 					colors.push( color.r, color.g, color.b );
 
 				}
-
+				console.log(colors);
 
 
 				// THREE.Line2 ( LineGeometry, LineMaterial )
