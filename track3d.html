@@ -1,317 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>three.js webgl - lines - fat</title>
+		<title>lines 3</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-<title>My first three.js app</title>
+		<title>Skitracker</title>
+
+		<style type="text/css">
+			body {
+						background-color: #000;
+						margin: 0px;
+						overflow: hidden;
+					}
+				#info {
+				position: absolute;
+				color: #ffffff;
+				top: 0px;
+				width: 100%;
+				padding: 5px;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+			}
+			a {
+				color: #fff;
+			}
+		</style>
 </head>
 <body>
 <div id="container"></div>
 
+<div id="info">Skitracker</div>
+
 <script src="js/three.js-master/myThree/three.min.js"></script>
-		<script src="js/three.js-master/myThree/WebGL.js"></script>
-		<script src="js/three.js-master/myThree/OrbitControls.js"></script>
-		<script src="js/three.js-master/myThree/hilbert3D.js"></script>
+<script src="js/three.js-master/myThree/WebGL.js"></script>
+<script src="js/three.js-master/myThree/OrbitControls.js"></script>
 
-		<script src="js/three.js-master/myThree/LineSegmentsGeometry.js"></script>
-		<script src="js/three.js-master/myThree/LineGeometry.js"></script>
-		<script src="js/three.js-master/myThree/WireframeGeometry2.js"></script>
-		<script src="js/three.js-master/myThree/LineMaterial.js"></script>
-		<script src="js/three.js-master/myThree/LineSegments2.js"></script>
-		<script src="js/three.js-master/myThree/Line2.js"></script>
-		<script src="js/three.js-master/myThree/Wireframe.js"></script>
-		<script src="js/three.js-master/myThree/stats.min.js"></script>
-		<script src="js/three.js-master/myThree/dat.gui.min.js"></script>
-		<script src="js/d3.v3.min.js"></script>
+<script src="js/three.js-master/myThree/LineSegmentsGeometry.js"></script>
+<script src="js/three.js-master/myThree/LineGeometry.js"></script>
 
-<script type="text/javascript">
+<script src="js/three.js-master/myThree/LineMaterial.js"></script>
+<script src="js/three.js-master/myThree/LineSegments2.js"></script>
+<script src="js/three.js-master/myThree/Line2.js"></script>
 
-var renderer,scene, camera;
+<script src="js/d3.v3.min.js"></script>
+
+<script>
 
 var url = new URL(window.location.href);
 var track_file = url.searchParams.get("track") + '.json';
 
+if ( WEBGL.isWebGLAvailable() === false ) {
 
-function init(realData){	
-		var data = {
-	  labels: {
-	  	y: ["0", "1000", "2000", "3000","4000","5000","6000","7000"], // TVD
-	    x: ["-1000", "0", "1000", "2000","3000"], // offset_east
-	    z: ["-1000", "0", "1000", "2000","3000"] // offset_north
-	  }
-	};
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
 
-	var graphDimensions = {
-		w:3,
-		d:3,
-		h:3
-	};
-
-
-	container = document.getElementById( 'container' );
-
-	var windowWidth=window.innerWidth, windowHeight= window.innerHeight;
-
-	// var windowWidth = $("#container").innerWidth(),
-	// 		windowHeight = $("#container").innerHeight();
-	    
-	scene = new THREE.Scene();
-	// var vectors = realData.map(function(d) {
-	// 	return new THREE.Vector3(d[0], d[1], d[2]);
-	// });
-
-	var vectors=[];
-	for(var i = 0; i<realData.length;i++){
-					var v_point = new THREE.Vector3(realData[i].x,realData[i].z,realData[i].y);
-					vectors.push(v_point);
-
-				}
-
-	var curve = new THREE.CatmullRomCurve3(vectors);
-
-	//var material = new THREE.LineBasicMaterial({color: "blue",linewidth: 5});
-	var material = new THREE.LineMaterial({color: "blue",linewidth: 5});
-
-	// var material = new THREE.LineMaterial( {
-
-	// 				color: "blue",
-	// 				linewidth: 3, // in pixels
-	// 				//vertexColors: THREE.VertexColors,
-	// 				//resolution:  // to be set by renderer, eventually
-	// 				dashed: false
-	// 			} );
-
-	var geometry = new THREE.Geometry();
-	var splinePoints = curve.getPoints(5000);
-
-	for (var i = 0; i < splinePoints.length; i++) {
-	  geometry.vertices.push(splinePoints[i]);
 	}
 
-	var line = new THREE.Line(geometry, material);
-	scene.add(line);
+var renderer,scene, camera, controls;
+var material, material2;
+var line,line2;
 
+function colour_convert(c){
 
-	light = new THREE.DirectionalLight( 0xffffff );
-	  light.position.set( 0, 0, 1 );
-	  scene.add( light );
-
-	  // create canvas
-	  var canvas = document.createElement( 'canvas' );
-	      canvas.width = 128;
-	      canvas.height = 128;
-
-	  var context = canvas.getContext( '2d' );
-	  var startPosition = new THREE.Vector3( 0, 0, 0 );
-	camera = new THREE.PerspectiveCamera( 40, windowWidth/windowHeight, 1, 30000 );
-	camera.position.set( startPosition.x, startPosition.y, startPosition.z );
-
-
-
-		var boundingGrid = new THREE.Object3D(),
-				depth = graphDimensions.w/2, //depth
-				width = graphDimensions.d/2, //width
-				height = graphDimensions.h/2, //height
-				a =(data.labels.y.length-1),
-				b= (data.labels.x.length-1),
-				c= (data.labels.z.length-1);
-
-		//pink
-		var newGridXY = createAGrid({
-					height: width,
-					width: height,
-					linesHeight: b,
-					linesWidth: a,
-					color: 0x000000
-				});
-				//newGridXY.position.y = height;
-		  	newGridXY.position.z = -depth;
-				boundingGrid.add(newGridXY);
-
-		//blue
-		var newGridYZ = createAGrid({
-					height: width,
-					width: depth,
-					linesHeight: b,
-					linesWidth: c,
-					color: 0x000000
-				});
-		 		newGridYZ.rotation.x = Math.PI/2;
-		 		newGridYZ.position.y = -height;
-				boundingGrid.add(newGridYZ);
-
-		//green
-		var newGridXZ = createAGrid({
-					height: depth,
-					width: height,
-					linesHeight:c,
-					linesWidth: a,
-					color: 0x000000
-				});
-
-				//newGridXZ.position.x = width;
-				//newGridXZ.position.y = height;
-		 		newGridXZ.rotation.y = Math.PI/2;
-				boundingGrid.add(newGridXZ);
-
-		//scene.add(boundingGrid);
-	  
-	  //line.rotateX(Math.PI / 2);
-	  boundingGrid.position.set(0, 0, 0);
-	  boundingGrid.scale.set(1, 1, 1);
-	 //line.scale.set(0.001, 0.001, 0.001);
-	 line.scale.set(3, 3, 3);
-
-	 var axesHelper = new THREE.AxesHelper( 3 );
-	scene.add( axesHelper );
-
-	// var labelsW = labelAxis(width, data.labels.x,"x");
-	// 			labelsW.position.x = width+40;
-	// 			labelsW.position.y = -height-40;
-	// 			labelsW.position.z = depth;
-	// 			scene.add(labelsW);
-	// var labelsH = labelAxis(height, data.labels.y,"y");
-	// 			labelsH.position.x = width;
-	// 			labelsH.position.y = - height +(2*height/a)-20;
-	// 			labelsH.position.z = depth;
-	// 			scene.add(labelsH);
-
-	// var labelsD = labelAxis(depth, data.labels.z, "z");
-	// 			labelsD.position.x = width+500;
-	// 			labelsD.position.y = -(height)-400;
-	// 			labelsD.position.z = depth-400;
-	// 			scene.add(labelsD);
-	    
-	renderer = new THREE.WebGLRenderer();
-	renderer.setSize( windowWidth, windowHeight );
-	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setClearColor( 0xf0f0f0 );
-	controls = new THREE.OrbitControls( camera );
-		//controls.damping = 0.2;
-		//controls.addEventListener( 'change', renderer );
-		controls.minDistance = 1;
-		controls.maxDistance = 500;
-	container.appendChild(  renderer.domElement );    
-	    
-	camera.position.z = 5;
-
-				
-
+	switch (c) {
+	  case 0: //red
+	    //return {'r':1,'g':0,'b':0};
+	    return new THREE.Color(0xff0000);
+	    break;
+	  case 1: // green
+	  	//return {'r':0,'g':1,'b':0};
+	  	return new THREE.Color(0x00ff00);
+	  	break;
+	  case 2: //blue
+	  	//return {'r':0,'g':0,'b':1};
+	  	return new THREE.Color(0x0000ff);
+	}
 };
 
 d3.json('json_files/'+track_file,function(data) {
-					init(data);
-				var animate = function () {
-					requestAnimationFrame( animate );
-					renderer.render(scene, camera);
-				};
 
-				animate();
+
+			init(data);
+			animate();
 	});
 
+function init(realData){	
+
+
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	renderer.setClearColor( 0x000000 ,0.0); //0xffffff
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+
+
+	scene = new THREE.Scene();
+
+	camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, 1, 1000 );
+	camera.position.set( 10, 10, 10 );
+
+	controls = new THREE.OrbitControls( camera ,renderer.domElement );
+	controls.minDistance = 1;
+	controls.maxDistance = 1000;
+
+
+	var colors= [];
+	var positions=[];
+
+	var scale = 4;
+
+	for(var i = 0; i<realData.length;i++){
+
+
+					var point = new THREE.Vector3(realData[i].x,realData[i].z,realData[i].y);
+					positions.push(point.x *scale, point.y *scale, point.z*scale);
+
+					var col = colour_convert(realData[i].c);
+					colors.push(col.r,col.g,col.b);
+	}
 
 
 
+	//advnaced
 
-function labelAxis(width, data, direction){
-
-  var separator = 2*width/data.length,
-			p = {
-				x:0,
-				y:0,
-				z:0
-			},
-			dobj = new THREE.Object3D();
-
-  for ( var i = 0; i < data.length; i ++ ) {
-		var label = makeTextSprite(data[i]);
-
-		label.position.set(p.x,p.y,p.z);
-
-		dobj.add( label );
-		if (direction=="y"){
-			p[direction]+=separator;
-		}else{
-			p[direction]-=separator;
-		}
-    //console.log(p.x+":"+p.y+":"+p.z)
-  }
-  return dobj;
-}
+	 var line_geometry = new THREE.LineGeometry();
+	 line_geometry.setPositions(positions);
+	 line_geometry.setColors(colors);
 
 
+	material2 = new THREE.LineMaterial( { linewidth: 5, color: 0xffffff, vertexColors: THREE.VertexColors, dashed:false } );
 
-function createAGrid(opts){
-		var config = opts || {
-			height: 500,
-			width: 500,
-			linesHeight: 10,
-			linesWidth: 10,
-			color: 0xFFFFFF
-		};
+	line2 = new THREE.Line2( line_geometry, material2 );
 
-		var material = new THREE.LineBasicMaterial({
-			color: config.color,
-			opacity: 0.2,
-      transparent: true
-		});
-
-		var gridObject = new THREE.Object3D(),
-				gridGeo= new THREE.Geometry(),
-				stepw = 2*config.width/config.linesWidth,
-				steph = 2*config.height/config.linesHeight;
-
-		//width
-		for ( var i = - config.width; i <= config.width; i += stepw ) {
-				gridGeo.vertices.push( new THREE.Vector3( - config.height, i,0 ) );
-				gridGeo.vertices.push( new THREE.Vector3(  config.height, i,0 ) );
-
-		}
-		//height
-		for ( var i = - config.height; i <= config.height; i += steph ) {
-				gridGeo.vertices.push( new THREE.Vector3( i,- config.width,0 ) );
-				gridGeo.vertices.push( new THREE.Vector3( i, config.width, 0 ) );
-		}
-
-		var line = new THREE.Line( gridGeo, material, THREE.LineSegments2);
-		gridObject.add(line);
-
-		return gridObject;
-}
-
-function makeTextSprite( message, parameters )
-{
-	if ( parameters === undefined ) parameters = {};
-
-	var fontface = parameters["fontface"] || "Helvetica";
-
-	var fontsize = parameters["fontsize"] || 13;
+	line2.computeLineDistances();
+	line2.scale.set(1,1,1);
+	scene.add(line2);
 
 
-	var canvas = document.createElement('canvas');
-	var context = canvas.getContext('2d');
-	context.font = fontsize + "px " + fontface;
+	light = new THREE.DirectionalLight( 0xffffff );
+		  light.position.set( 0, 0, 1 );
+		  scene.add( light );
+			
 
-	// get size data (height depends only on font size)
-	var metrics = context.measureText( message );
-	var textWidth = metrics.width;
+	var axesHelper = new THREE.AxesHelper( scale );
+	scene.add( axesHelper );
 
 
-	// text color
-	context.fillStyle = "rgba(0, 0, 0, 1.0)";
-	context.fillText( message, 0, fontsize);
+	window.addEventListener( 'resize', onWindowResize, false );
+					onWindowResize();
 
-	// canvas contents will be used for a texture
-	var texture = new THREE.Texture(canvas)
-			texture.minFilter = THREE.LinearFilter;
-			texture.needsUpdate = true;
+};
 
-	var spriteMaterial = new THREE.SpriteMaterial({ map: texture, useScreenCoordinates: false});
-	var sprite = new THREE.Sprite( spriteMaterial );
-	sprite.scale.set(0.5 * fontsize, 0.25 * fontsize, 0.75 * fontsize);
-	return sprite;
-}
+function animate () {
+				requestAnimationFrame( animate );
+				renderer.setClearColor( 0x000000, 0 );
+				renderer.setViewport( 0, 0, window.innerWidth, window.innerHeight );
+
+				// renderer will set this eventually
+				material2.resolution.set( window.innerWidth, window.innerHeight ); // resolution of the viewport
+
+				renderer.render(scene, camera);
+
+};
+
+function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			};
 
 </script>
 </body>

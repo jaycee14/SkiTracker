@@ -74,18 +74,29 @@ function colour_convert(c){
 	}
 };
 
-d3.json('json_single.json',function(data) {
+d3.json('json_files/giacomo_18Mar19_0.json',function(data) {
 
 
 			var data_test = [{'x':2,'y':3,'z':0,'c':2},{'x':2,'y':4,'z':4,'c':0},{'x':2,'y':2,'z':2,'c':1},{'x':0,'y':0,'z':0,'c':2}];
 			
-
+			console.log(data[0])
 			init(data);
 			animate();
 	});
 
 function init(realData){	
 
+	/*
+		orientation
+		web interface
+		all data processed
+		upload
+		flat finder
+
+		AxesHelper
+		An axis object to visualize the 3 axes in a simple way.
+		The X axis is red. The Y axis is green. The Z axis is blue.
+	*/
 
 	renderer = new THREE.WebGLRenderer({ antialias: true });
 	renderer.setClearColor( 0x000000 ,0.0); //0xffffff
@@ -121,9 +132,14 @@ function init(realData){
 	//for(var i = 0; i<points_vectors.length;i++){
 
 
-					var v_point = new THREE.Vector3(realData[i].x,realData[i].y,realData[i].z);
+					var v_point = new THREE.Vector3(realData[i].x,realData[i].z,realData[i].y);
 					vectors.push(v_point);
 					var colour_code = colour_convert(realData[i].c);
+
+					if(colour_code == undefined){
+						console.log(realData[i]);
+					}
+					console.log(colour_code);
 					colors.push(colour_code);
 
 					//var point = points_vectors[i];
@@ -137,6 +153,8 @@ function init(realData){
 		
 					var point = v_point;
 					positions.push(point.x *scale, point.y *scale, point.z*scale);
+
+
 
 					var col = colour_code;
 					colourz.push(col.r,col.g,col.b);
@@ -155,7 +173,7 @@ function init(realData){
 	material = new THREE.LineBasicMaterial( { linewidth: 2, color: 0xffffff, vertexColors: THREE.VertexColors} );
 	line = new THREE.Line( geometry, material );
 	line.computeLineDistances();
-	scene.add( line );
+	//scene.add( line );
 
 
 	//advnaced

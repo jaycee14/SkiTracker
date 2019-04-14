@@ -33,13 +33,16 @@ function colour_convert(c){
 
 	switch (c) {
 	  case 0: //red
-	    return {'r':1,'g':0,'b':0};
+	    //return {'r':1,'g':0,'b':0};
+	    return new THREE.Color(0xff0000);
 	    break;
 	  case 1: // green
-	  	return {'r':0,'g':1,'b':0};
+	  	//return {'r':0,'g':1,'b':0};
+	  	return new THREE.Color(0x00ff00);
 	  	break;
 	  case 2: //blue
-	  	return {'r':0,'g':0,'b':1};
+	  	//return {'r':0,'g':0,'b':1};
+	  	return new THREE.Color(0x0000ff);
 	}
 }
 
@@ -71,44 +74,52 @@ function init(realData){
 	// 	return new THREE.Vector3(d[0], d[1], d[2]);
 	// });
 
-	var vectors=[];
-	var colors=[];
+	var vectors= [];
+	var colors= [];
 	for(var i = 0; i<realData.length;i++){
 					var v_point = new THREE.Vector3(realData[i].x,realData[i].z,realData[i].y);
 					vectors.push(v_point);
 				}
 
 	console.log(realData.length);
+	console.log(vectors);
 
-	var curve = new THREE.CatmullRomCurve3(vectors);
+	//var curve = new THREE.CatmullRomCurve3(vectors);
 
-	// var material = new THREE.LineMaterial( {
-
-	// 				color: 0xffffff,
-	// 				linewidth: 3, // in pixels
-	// 				vertexColors: THREE.VertexColors,
-	// 				//resolution:  // to be set by renderer, eventually
-	// 				dashed: false
-	// 			} );
-	var material = new THREE.LineBasicMaterial({color: "blue",linewidth: 5});
+	
 
 	var geometry = new THREE.Geometry();
 	//var geometry = new THREE.LineGeometry();
-	var splinePoints = curve.getPoints(realData.length-1);
+	//var splinePoints = curve.getPoints();s
 
-	console.log(splinePoints.length);
+	console.log(vectors.length);
+	//geometry.vertices = vectors;
 
-	for (var i = 0; i < splinePoints.length; i++) {
+	for (var i = 0; i < vectors.length; i++) {
 	  //geometry.setPositions(splinePoints[i]);
-	  geometry.vertices.push(splinePoints[i]);
-	  //color.setHSL( 0.8, 1.0, 0.5 );
-	  color_code = colour_convert(realData[i].c)
-	  colors.push( color_code.r, color_code.g, color_code.b);
+	  geometry.vertices.push(vectors[i]);
+	  
 	}
-	console.log(colors);
+	console.log(geometry.vertices);
+	//prepare colours
 
-	//geometry.setColors( colors );
 
+
+	//console.log(colors);
+
+	// geometry.colors=colors;
+	geometry.colorsNeedUpdate=true; 
+
+
+	var material = new THREE.LineBasicMaterial( {
+
+					color: 0xffffff,
+					linewidth: 3, // in pixels
+					vertexColors: THREE.VertexColors,
+					//resolution:  // to be set by renderer, eventually
+					//dashed: false
+				} );
+	//var material = new THREE.LineBasicMaterial({color: "blue",linewidth: 5});
 
 	var line = new THREE.Line(geometry, material);
 	scene.add(line);
@@ -124,63 +135,63 @@ function init(realData){
 	      canvas.height = 128;
 
 	  var context = canvas.getContext( '2d' );
-	  var startPosition = new THREE.Vector3( 0, 0, 0 );
+	  var startPosition = new THREE.Vector3( 0, 0, 5 );
 	camera = new THREE.PerspectiveCamera( 40, windowWidth/windowHeight, 1, 30000 );
 	camera.position.set( startPosition.x, startPosition.y, startPosition.z );
 
 
 
-		var boundingGrid = new THREE.Object3D(),
-				depth = graphDimensions.w/2, //depth
-				width = graphDimensions.d/2, //width
-				height = graphDimensions.h/2, //height
-				a =(data.labels.y.length-1),
-				b= (data.labels.x.length-1),
-				c= (data.labels.z.length-1);
+		// var boundingGrid = new THREE.Object3D(),
+		// 		depth = graphDimensions.w/2, //depth
+		// 		width = graphDimensions.d/2, //width
+		// 		height = graphDimensions.h/2, //height
+		// 		a =(data.labels.y.length-1),
+		// 		b= (data.labels.x.length-1),
+		// 		c= (data.labels.z.length-1);
 
-		//pink
-		var newGridXY = createAGrid({
-					height: width,
-					width: height,
-					linesHeight: b,
-					linesWidth: a,
-					color: 0x000000
-				});
-				//newGridXY.position.y = height;
-		  	newGridXY.position.z = -depth;
-				boundingGrid.add(newGridXY);
+		// //pink
+		// var newGridXY = createAGrid({
+		// 			height: width,
+		// 			width: height,
+		// 			linesHeight: b,
+		// 			linesWidth: a,
+		// 			color: 0x000000
+		// 		});
+		// 		//newGridXY.position.y = height;
+		//   	newGridXY.position.z = -depth;
+		// 		boundingGrid.add(newGridXY);
 
-		//blue
-		var newGridYZ = createAGrid({
-					height: width,
-					width: depth,
-					linesHeight: b,
-					linesWidth: c,
-					color: 0x000000
-				});
-		 		newGridYZ.rotation.x = Math.PI/2;
-		 		newGridYZ.position.y = -height;
-				boundingGrid.add(newGridYZ);
+		// //blue
+		// var newGridYZ = createAGrid({
+		// 			height: width,
+		// 			width: depth,
+		// 			linesHeight: b,
+		// 			linesWidth: c,
+		// 			color: 0x000000
+		// 		});
+		//  		newGridYZ.rotation.x = Math.PI/2;
+		//  		newGridYZ.position.y = -height;
+		// 		boundingGrid.add(newGridYZ);
 
-		//green
-		var newGridXZ = createAGrid({
-					height: depth,
-					width: height,
-					linesHeight:c,
-					linesWidth: a,
-					color: 0x000000
-				});
+		// //green
+		// var newGridXZ = createAGrid({
+		// 			height: depth,
+		// 			width: height,
+		// 			linesHeight:c,
+		// 			linesWidth: a,
+		// 			color: 0x000000
+		// 		});
 
-				//newGridXZ.position.x = width;
-				//newGridXZ.position.y = height;
-		 		newGridXZ.rotation.y = Math.PI/2;
-				boundingGrid.add(newGridXZ);
+		// 		//newGridXZ.position.x = width;
+		// 		//newGridXZ.position.y = height;
+		//  		newGridXZ.rotation.y = Math.PI/2;
+		// 		boundingGrid.add(newGridXZ);
 
 		//scene.add(boundingGrid);
 	  
 	  //line.rotateX(Math.PI / 2);
-	  boundingGrid.position.set(0, 0, 0);
-	  boundingGrid.scale.set(1, 1, 1);
+	 // boundingGrid.position.set(0, 0, 0);
+	 // boundingGrid.scale.set(1, 1, 1);
 	 //line.scale.set(0.001, 0.001, 0.001);
 	 line.scale.set(3, 3, 3);
 
