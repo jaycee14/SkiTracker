@@ -107,15 +107,16 @@ function init(realData){
 	var colors= [];
 	var positions=[];
 
-	var scale = 4;
+	var scale = realData['scale'];
+	var datapoints = realData['values'];
 
-	for(var i = 0; i<realData.length;i++){
+	for(var i = 0; i<datapoints.length;i++){
 
 
-					var point = new THREE.Vector3(realData[i].x,realData[i].z,realData[i].y);
-					positions.push(point.x *scale, point.y *scale, point.z*scale);
+					var point = new THREE.Vector3(datapoints[i].x,datapoints[i].z,datapoints[i].y);
+					positions.push(point.x *scale, point.y, point.z*scale);
 
-					var col = colour_convert(realData[i].c);
+					var col = colour_convert(datapoints[i].c);
 					colors.push(col.r,col.g,col.b);
 	}
 
@@ -142,7 +143,7 @@ function init(realData){
 		  scene.add( light );
 			
 
-	var axesHelper = new THREE.AxesHelper( scale );
+	var axesHelper = new THREE.AxesHelper( 1 );
 	scene.add( axesHelper );
 
 
