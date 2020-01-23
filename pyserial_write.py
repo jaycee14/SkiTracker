@@ -12,4 +12,4 @@ with open('dataOut.csv', 'a') as the_file:
 		message = ser.readline()
 		message = message.rstrip()
 		print(message)
-		the_file.write(message+'\n')
+		the_file.write(message.decode('ascii')+'\n')

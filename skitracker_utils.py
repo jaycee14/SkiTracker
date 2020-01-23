@@ -94,7 +94,7 @@ def prepare_data(raw):
     data['gradient'] = data.apply(calc_gradient, axis=1, vert_field='GPS_Alt_Delta')
     data['pres_gradient'] = data.apply(calc_gradient, axis=1, vert_field='Pres_Alt_Delta')
 
-    data['grad_roll'] = data.gradient.rolling(10).mean()
+    data['grad_roll'] = data.gradient.rolling(5).mean()
 
     data['grad_colour'] = data.apply(calc_grad_roll_colour, axis=1, grad_field='grad_roll')
 
@@ -260,6 +260,34 @@ def calc_grad_roll_colour(row, grad_field):
     if grad >= -25.0:
         return 1  # green
     elif grad >= -75.0:
-        return 2  # blue
-    else:
         return 0  # red
+    else:
+        return 2  # blue
+
+
+class InFile(object):
+    """class to do pre-processing for a inout file
+
+        https://stackoverflow.com/questions/52153414/how-to-pre-process-data-before-pandas-read-csv
+    """
+
+    def __init__(self, infile):
+        self.infile = open(infile)
+
+    def __next__(self):
+        return self.next()
+
+    def __iter__(self):
+        return self
+
+    def read(self, *args, **kwargs):
+        return self.__next__()
+
+    def next(self):
+        try:
+            line: str = self.infile.readline()
+            line = line[1:-1] # do some fixing
+            return line
+        except:
+            self.infile.close()
+            raise StopIteration
