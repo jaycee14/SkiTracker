@@ -1,5 +1,8 @@
 import serial
 
+# have you set up dialout?
+# sudo adduser $USER dialout
+
 #Have this code ready to go, upload script to feather and then run this script
 
 #port = '/dev/cu.usbmodem411'

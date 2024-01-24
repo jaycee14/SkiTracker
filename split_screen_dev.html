@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Split Screen</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link rel="stylesheet" href="./js/leaflet-0.7.2.css"/>
+		<link rel="stylesheet" href="./js/leaflet.elevation-0.0.4.css"/>
+		<script src="./js/d3.v3.min.js"></script>
+   		<script src="./js/leaflet-0.7.2.js"></script>
+   		<script src="./js/leaflet.elevation-0.0.4.min.js"></script>
+   		<script src="./js/gpx.min.js"></script>
+   		
+   		<script src="js/three.js-master/myThree/three.min.js"></script>
+        <script src="js/three.js-master/myThree/WebGL.js"></script>
+        <script src="js/three.js-master/myThree/OrbitControls.js"></script>
+
+        <script src="js/three.js-master/myThree/LineSegmentsGeometry.js"></script>
+        <script src="js/three.js-master/myThree/LineGeometry.js"></script>
+
+        <script src="js/three.js-master/myThree/LineMaterial.js"></script>
+        <script src="js/three.js-master/myThree/LineSegments2.js"></script>
+        <script src="js/three.js-master/myThree/Line2.js"></script>
+
+        <script src="js/d3.v3.min.js"></script>
+
+	</head>
+	<style type="text/css">
+		#mapid { height: 512px; }
+/* 		#container { height: 512px; } */
+	</style>
+	<body>
+		<div id="mapid"></div>
+		<div id="container"></div>
+
+        <div id="info">Skitracker</div>
+        
+<script type="text/javascript">
+
+    // map script
+
+    var url = new URL(window.location.href);
+    
+    
+    var gpx_file = 'test_' + url.searchParams.get("id")  +'_gpx.xml';
+    console.log(gpx_file);
+    
+    //45.5105704,6.6642068 la plagne
+    //45.0804145, 6.0929205 alp d'huez
+    var mymap = L.map('mapid').setView([45.5105704,6.6642068], 13);
+
+    var el = L.control.elevation({
+                        position: "topright",
+                        theme: "steelblue-theme", //default: lime-theme
+                        width: 600,
+                        height: 125,
+                        margins: {
+                        top: 10,
+                        right: 20,
+                        bottom: 30,
+                        left: 50
+                        },
+                        useHeightIndicator: true, //if false a marker is drawn at map position
+                        interpolation: "linear", //see https://github.com/mbostock/d3/wiki/SVG-Shapes#wiki-area_interpolate
+                        hoverNumber: {
+                        decimalsX: 3, //decimals on distance (always in km)
+                        decimalsY: 0, //deciamls on hehttps://www.npmjs.com/package/leaflet.coordinatesight (always in m)
+                        formatter: undefined //custom formatter function may be injected
+                        },
+                        xTicks: undefined, //number of ticks in x axis, calculated by default according to width
+                        yTicks: undefined, //number of ticks on y axis, calculated by default according to height
+                        collapsed: false,  //collapsed mode, show chart on click or mouseover
+                        imperial: false    //display imperial units instead of metric
+                        });
+    el.addTo(mymap);
+    
+    var g=new L.GPX("split_screen_files/"+gpx_file, {async: true,marker_options: {
+                                                    startIconUrl: './js/pin-icon-start.png',
+                                                    endIconUrl: './js/pin-icon-end.png',
+                                                    shadowUrl: './js/pin-shadow.png'
+                                                }});
+    g.on("addline",function(e){
+        el.addData(e.line);
+    });
+    g.addTo(mymap);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+
+</script>
+<script type="text/javascript">
+
+// 3D script
+
+var url = new URL(window.location.href);
+var json_file = 'test_'+ url.searchParams.get("id") + '.json';
+
+if ( WEBGL.isWebGLAvailable() === false ) {
+
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+
+	}
+
+var renderer,scene, camera, controls;
+var material, material2;
+var line,line2;
+
+    function colour_convert(c){
+
+        switch (c) {
+        case 0: //red
+            //return {'r':1,'g':0,'b':0};
+            return new THREE.Color(0xff0000);
+            break;
+        case 1: // green
+            //return {'r':0,'g':1,'b':0};
+            return new THREE.Color(0x00ff00);
+            break;
+        case 2: //blue
+            //return {'r':0,'g':0,'b':1};
+            return new THREE.Color(0x0000ff);
+        }
+    };
+
+    d3.json('split_screen_files/'+json_file,function(data) {
+
+
+                init(data);
+                animate();
+        });
+
+    function init(realData){	
+
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor( 0x000000 ,0.0); //0xffffff
+        renderer.setPixelRatio( window.devicePixelRatio );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera( 20, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.set( 10, 10, 10 );
+
+        controls = new THREE.OrbitControls( camera ,renderer.domElement );
+        controls.minDistance = 1;
+        controls.maxDistance = 1000;
+
+
+        var colors= [];
+        var positions=[];
+
+        var scale = realData['scale'];
+        var datapoints = realData['values'];
+
+        for(var i = 0; i<datapoints.length;i++){
+
+
+                        var point = new THREE.Vector3(datapoints[i].x,datapoints[i].z,datapoints[i].y);
+                        positions.push(point.x *scale, point.y, point.z*scale);
+
+                        var col = colour_convert(datapoints[i].c);
+                        colors.push(col.r,col.g,col.b);
+        }
+
+
+
+        //advnaced
+
+        var line_geometry = new THREE.LineGeometry();
+        line_geometry.setPositions(positions);
+        line_geometry.setColors(colors);
+
+
+        material2 = new THREE.LineMaterial( { linewidth: 5, color: 0xffffff, vertexColors: THREE.VertexColors, dashed:false } );
+
+        line2 = new THREE.Line2( line_geometry, material2 );
+
+        line2.computeLineDistances();
+        line2.scale.set(1,1,1);
+        scene.add(line2);
+
+
+        light = new THREE.DirectionalLight( 0xffffff );
+            light.position.set( 0, 0, 1 );
+            scene.add( light );
+                
+
+        var axesHelper = new THREE.AxesHelper( 1 );
+        scene.add( axesHelper );
+
+
+        window.addEventListener( 'resize', onWindowResize, false );
+                        onWindowResize();
+
+    };
+
+    function animate () {
+                    requestAnimationFrame( animate );
+                    renderer.setClearColor( 0x000000, 0 );
+                    renderer.setViewport( 0, 0, window.innerWidth, window.innerHeight );
+
+                    // renderer will set this eventually
+                    material2.resolution.set( window.innerWidth, window.innerHeight ); // resolution of the viewport
+
+                    renderer.render(scene, camera);
+
+    };
+
+    function onWindowResize() {
+
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+
+                    renderer.setSize( window.innerWidth, window.innerHeight );
+
+                };
+
+</script>
+		
+		
+</body>
+</html>
