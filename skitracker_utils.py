@@ -143,8 +143,8 @@ def find_routes(data):
     runs_data = []
     for i in range(num_runs):
         run = {}
-        start = np.int(runs.loc[i].start_idx)
-        end = np.int(runs.loc[i].end_idx)
+        start = int(runs.loc[i].start_idx)
+        end = int(runs.loc[i].end_idx)
         run_data = data.loc[start:end].copy()
         run['run_data'] = run_data
 
