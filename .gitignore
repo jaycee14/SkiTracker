@@ -4,3 +4,5 @@ gpx_files/
 legacy files/
 raw_data_collected/
 
+.DS_Store
+*.pyc
